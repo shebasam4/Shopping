@@ -3,14 +3,17 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var hbs=require('express-handlebars')
+var hbs=require('express-handlebars');
 
-
+var db=require('./config/connection');
+var session=require('express-session')
 var adminRouter = require('./routes/admin');
 var usersRouter = require('./routes/users');
 
+
 var app = express();
 var fileUpload=require('express-fileupload');
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -21,6 +24,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(fileUpload())
+app.use(session({secret:"Key",cookie:{maxAge:600000}}))
+db.connect((err)=>{
+  if(err){
+    console.log("connection error"+err);
+  }
+  else{
+    console.log("DB connected");
+  } 
+})
+
+
+
 app.use('/', usersRouter);
 app.use('/admin', adminRouter);
 
